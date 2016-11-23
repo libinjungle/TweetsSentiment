@@ -16,6 +16,7 @@ porter_stemmer = nltk.stem.PorterStemmer()
 # tok = tokenizer.Tokenizer(preserve_case=False)
 p.set_options(p.OPT.URL, p.OPT.HASHTAG)
 
+
 def tokenize(text):
     # preprocessing tweet
     pre_cleaned = p.clean(text)
@@ -55,10 +56,17 @@ def construct_training_data(filename):
                 training_data.append((tweet_final, 'neutral'))
             elif text_splited[1] == '4':
                 training_data.append((tweet_final, 'positive'))
+    # print(training_data)
+    return training_data
 
 
-            # print('Apply Porter Stemmer...')
-    print(training_data)
+def get_word_features(training_data):
+    word_list = []
+    for (words, sentiment) in training_data:
+        word_list.extend(words)
+    words_freq = nltk.FreqDist(word_list)
+    word_features = words_freq.keys()
+    return word_features
 
 
 if __name__ == "__main__":
