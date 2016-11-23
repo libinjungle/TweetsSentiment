@@ -1,4 +1,5 @@
 import nltk
+import pickle
 import my_tokenizer
 from sklearn.cross_validation import KFold, cross_val_score
 
@@ -44,8 +45,24 @@ def create_classifier(extract, data):
 
 if __name__ == "__main__":
     tweet = "you are awesome"
-    classifier = create_classifier(extract_features, training_data)
-    # print(classifier.classify(extract_features(tweet.split())))
+    tweet_1 = "I hate you"
+    # classifier = create_classifier(extract_features, training_data)
+
+
+    # save classifier
+    # f = open('my_classifier.cf', 'wb')
+    # pickle.dump(classifier, f)
+    # f.close()
+
+    # load classifier
+    f = open('my_classifier.cf', 'rb')
+    classifier = pickle.load(f)
+    f.close()
+
+    print(classifier.classify(extract_features(tweet_1.split())))
+
+
+
 
 
 
