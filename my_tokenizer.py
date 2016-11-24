@@ -6,9 +6,9 @@ import nltk
 from nltk.corpus import stopwords
 
 
-# download nltk module
-nltk.download('stopwords')
-nltk.download('punkt')
+# download nltk module. only do this on the first time
+# nltk.download('stopwords')
+# nltk.download('punkt')
 operators = {'not'}
 # stop words
 stops = set(stopwords.words('english')) - operators
@@ -56,8 +56,8 @@ def construct_training_data(filename):
                 training_data.append((tweet_final, 'neutral'))
             elif text_splited[1] == '4':
                 training_data.append((tweet_final, 'positive'))
-    # print(training_data)
-    return training_data
+    print(training_data)
+    # return training_data
 
 
 def get_word_features(training_data):
@@ -70,7 +70,7 @@ def get_word_features(training_data):
 
 
 if __name__ == "__main__":
-    file = "/Users/binli/PycharmProjects/TweetSentiment/data/testdata.manual.2009.06.14.csv"
+    file = "/Users/binli/PycharmProjects/TweetSentiment/data/tweets_small_corpus"
     construct_training_data(file)
 
 
