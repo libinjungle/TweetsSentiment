@@ -21,7 +21,7 @@ def create_classifier(extract, data):
     classifier = nltk.NaiveBayesClassifier.train(training_set)
     # print(len(training_set))
     #
-    print(classifier.show_most_informative_features(32))
+    # print(classifier.show_most_informative_features(32))
 
     # # cross validation
     # cv = KFold(len(training_set), n_folds=10,
@@ -50,6 +50,7 @@ if __name__ == "__main__":
     tweet_1 = "I hate you"
     # neutral
     tweet_2 = "eat"
+
     # classifier = create_classifier(extract_features, training_data)
 
 

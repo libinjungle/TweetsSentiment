@@ -9,9 +9,10 @@ from nltk.corpus import stopwords
 # download nltk module. only do this on the first time
 # nltk.download('stopwords')
 # nltk.download('punkt')
-operators = {'not'}
+not_included_operators = {'not'}
+included_operators = {'rt', 'http'}
 # stop words
-stops = set(stopwords.words('english')) - operators
+stops = set(stopwords.words('english')).union(included_operators) - not_included_operators
 porter_stemmer = nltk.stem.PorterStemmer()
 # tok = tokenizer.Tokenizer(preserve_case=False)
 p.set_options(p.OPT.URL, p.OPT.HASHTAG)
@@ -19,7 +20,7 @@ p.set_options(p.OPT.URL, p.OPT.HASHTAG)
 
 def tokenize(text):
     # preprocessing tweet
-    pre_cleaned = p.clean(text)
+    pre_cleaned = p.clean(text.lower())
     # remove quotes
     temp = re.sub(r'&amp;quot;|&amp;amp', '', pre_cleaned)
     # remove citations
@@ -36,13 +37,37 @@ def tokenize(text):
     tweet_cleaned = map(lambda s: s.translate(None, string.punctuation), tweet_cleaned)
     # remove stop word
     tweet_cleaned_no_stopword = [word for word in tweet_cleaned if word not in stops]
-    # apply porter stemmer
+    # apply porter stemmer. note: http is porter stemmer of some other word
     tweet_stemmer = map(lambda word: str(porter_stemmer.stem_word(word)), tweet_cleaned_no_stopword)
-    tweet_final = [word for word in tweet_stemmer if len(word) >= 2]
+
+    tweet_final = [word.lower() for word in tweet_stemmer if len(word) >= 2]
     return tweet_final
 
 
+def clean_tweet(ifile, ofile):
+    '''
+    clean tweet and output to a new file.
+
+    :param ifile:
+    :param ofile:
+    :return:
+    '''
+
+    with open(ofile, 'w') as out:
+        with open(ifile) as tweets:
+            for tweet in tweets:
+                tweet_cleaned = tokenize(tweet)
+                if tweet_cleaned:
+                    text = ' '.join(tweet_cleaned)
+                    out.write(text + '\n')
+
+
 def construct_training_data(filename):
+    '''
+    used for parsing downloaded training data
+    :param filename:
+    :return:
+    '''
     training_data = []
     with open(filename) as tweets:
         for tweet in tweets:
@@ -56,8 +81,8 @@ def construct_training_data(filename):
                 training_data.append((tweet_final, 'neutral'))
             elif text_splited[1] == '4':
                 training_data.append((tweet_final, 'positive'))
-    print(training_data)
-    # return training_data
+    # print(training_data)
+    return training_data
 
 
 def get_word_features(training_data):
@@ -70,7 +95,12 @@ def get_word_features(training_data):
 
 
 if __name__ == "__main__":
-    file = "/Users/binli/PycharmProjects/TweetSentiment/data/tweets_small_corpus"
+
+    training_data_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
+    tweets_corpus_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_small_corpus"
     construct_training_data(file)
+
+    # tweet preprocessing
+    # clean_tweet(file, "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_cleaned.txt")
 
 
