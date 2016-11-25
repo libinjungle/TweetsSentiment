@@ -98,7 +98,8 @@ if __name__ == "__main__":
 
     training_data_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
     tweets_corpus_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_small_corpus"
-    construct_training_data(file)
+    hillari_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillari_tweets"
+    construct_training_data(hillari_file)
 
     # tweet preprocessing
     # clean_tweet(file, "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_cleaned.txt")
