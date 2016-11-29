@@ -5,7 +5,6 @@ import preprocessor as p
 import nltk
 from nltk.corpus import stopwords
 
-
 # download nltk module. only do this on the first time
 # nltk.download('stopwords')
 # nltk.download('punkt')

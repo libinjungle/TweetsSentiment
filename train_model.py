@@ -102,6 +102,7 @@ if __name__ == "__main__":
                     sentiment = classifier.classify(model.extract_features(tweet_cleaned))
                     model.write_to_hbase(conn, batch, tweet, sentiment)
                     HBase.row_count += 1
+        batch.send()
     finally:
         conn.close()
 

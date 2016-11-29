@@ -5,7 +5,8 @@ class HBase(object):
     row_count = 0
     namespace = "bl1810"
     batch_size = 1000
-    host = "128.122.215.51"
+    # should be "localhost" if this program and hbase are running on the same machine
+    host = "localhost"
 
     @staticmethod
     def connect_to_hbase():
