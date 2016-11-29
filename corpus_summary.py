@@ -1,7 +1,10 @@
 from my_tokenizer import *
 from collections import Counter
+import numpy
+import random
 
 PAD = "PAD"
+LABELS = {-1 : 'negative', 0 : 'neutral', 1 : 'positive'}
 
 def token_filter(function, tokens_map):
     return {k : tokens_map[k] for k in filter(function, tokens_map)}
@@ -75,18 +78,13 @@ def create_gram_map(tf, thresh):
     return token_map
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def generate_dataset_vectors(tweets, vectorizer):
+    data = map(lambda tweet : (tweet[1], vectorizer.vectorize(tweet)), tweets)
+    rows = len(data)
+    cols = len(data[0][1]) + 1
+    random.shuffle(data)
+    data_array = numpy.zeros([rows, cols])
+    for i, t in enumerate(data):
+        data_array[i, 0] = t[0]
+        data_array[i, 1:] = t[1]
+    return data_array
