@@ -2,6 +2,8 @@ from my_tokenizer import *
 from collections import Counter
 import numpy
 import random
+import math
+from my_classifiers import *
 
 PAD = "PAD"
 LABELS = {-1 : 'negative', 0 : 'neutral', 1 : 'positive'}
@@ -88,3 +90,66 @@ def generate_dataset_vectors(tweets, vectorizer):
         data_array[i, 0] = t[0]
         data_array[i, 1:] = t[1]
     return data_array
+
+
+def divide(dataset, i, k=4):
+    num_samples = dataset.shape[0]
+    fold_size = int(math.ceil(num_samples / float(k)))
+    training_range = range(0, i*fold_size) + range((i+1)*fold_size, num_samples)
+    validation_range = range(i*fold_size, min((i+1))*fold_size, num_samples)
+    return dataset[training_range, :], dataset[validation_range, :]
+
+
+def slicing_labels_features(dataset):
+    data = dataset[:, 1:]
+    label = dataset[:, 0]
+    return label, data
+
+
+def k_fold_validation(dataset, classifier, k=4):
+    tp = Counter()
+    tn = Counter()
+    fp = Counter()
+    fn = Counter()
+
+    correct = 0
+    for i in range(4):
+        training_set, validation_set = divide(dataset, i, k)
+        tl, td = slicing_labels_features(training_set)
+        vl, vd = slicing_labels_features(validation_set)
+        classifier.train(td, tl)
+        predictions = classifier.classify_tweets(vd)
+
+        for i in LABELS:
+            tp_i = ((vl == i) * (predictions == i)).sum()
+            tp[i] += tp_i
+            correct += tp_i
+            tn_i = ((vl != i) * (predictions != i)).sum()
+            tn[i] += tn_i
+            correct += tn_i
+            fp[i] = ((vl != i) * (predictions == i)).sum()
+            fn[i] = ((vl == i) * (predictions != i)).sum()
+    size = dataset.shape[0]
+    return correct / float(size), tp, tn, fp, fn
+
+
+def get_validation_summary(tp, tn, fp, fn, verbose):
+    ans = {}
+    for i in tp:
+        ans[i] = get_label_summary(tp, tn, fp, fn, i, verbose)
+    return ans
+
+
+def get_label_summary(tp, tn, fp, fn, i, verbose):
+    accu = (tp[i]+tn[i]) / float(tp[i]+tn[i]+fp[i]+fn[i])
+    precision = tp[i] / float(tp[i]+fp[i])
+    recall = tp[i] / float(tp[i]+fn[i])
+    if verbose:
+        print('------------label:%d------------' % i)
+        print('tp: %d, tn: %d, fp: %d, fn: %d' % (tp[i], tn[i], fp[i], fn[i]))
+        print('accuracy:    %.3f' % accu)
+        print('precison:    %.3f' % precision)
+        print('recall:      %.3f' % recall)
+        print('--------------------------------')
+    return accu, precision, recall
+
