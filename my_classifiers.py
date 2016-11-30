@@ -65,6 +65,7 @@ class NaiveBayesClassifier(Classifier):
             features_prior += label_feature_matrix[idx, :]
             label_feature_matrix[idx, :] *= 1.0 / label_feature_matrix[idx, :].sum()
             self.labels_prior = len(indexes) / float(num_samples)
+        # print(features_prior)
         features_prior *= 1.0 / features_prior.sum()
         self.features_prior = numpy.log(features_prior).T
         self.label_feature_matrix = numpy.log(label_feature_matrix).T

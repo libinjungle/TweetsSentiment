@@ -46,7 +46,7 @@ class BigramVectorizer(Vectorizer):
         v = numpy.zeros(self.tokens_size)
         padded = [PAD] + tweet[0] + [PAD]
         for i in range(0, len(padded)-1):
-            bigram = padded[i:i+2]
+            bigram = tuple(padded[i:i+2])
             if bigram in self.bigram_map:
                 v[self.bigram_map[bigram]] += 1
             # did not consider those bigrams that are not in map
