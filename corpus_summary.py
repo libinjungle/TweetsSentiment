@@ -33,7 +33,7 @@ def count_tokens(tweets):
     '''
     tf = Counter()
     t_doc_f = Counter()
-
+    # tweet is a tuple with first element as tweet token list, second element is sentiment
     for tweet in tweets:
         tokens = tweet[0]
         token_set = set()
@@ -100,6 +100,7 @@ def create_gram_map(tf, thresh):
 
 def generate_dataset_vectors(tweets, vectorizer):
     data = map(lambda tweet : (tweet[1], vectorizer.vectorize(tweet)), tweets)
+    # print(data)
     rows = len(data)
     cols = len(data[0][1]) + 1
     random.shuffle(data)
@@ -195,6 +196,20 @@ if __name__ == '__main__':
             classifier = NaiveBayesClassifier(v.tokens_size, LABELS)
             accu, tp, tn, fp, fn = k_fold_validation(dataset, classifier)
             ans[(j, i)] = get_validation_summary(tp, tn, fp, fn)
+
+    header = 'Label,Model(u,b),Freq,accuracy,precison,recall'
+    result = []
+
+    for label in LABELS:
+        for j, i in ans:
+            r = ans[(j,i)][label]
+            # print('%d %d %d %f %f %f' % (label, j, i, r[0], r[1], r[2]))
+            result.append([label, j, i, r[0], r[1], r[2]])
+        # print('')
+    result = numpy.array(result)
+    numpy.savetxt('kfold_nb.stats.csv', result, delimiter=',', header=header)
+
+
 
 
 # 10-fold validation on unigram (Naive Bayes)

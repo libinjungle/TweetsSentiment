@@ -16,6 +16,7 @@ class Classifier(object):
         ans = numpy.zeros(len(tweets))
         for i, t in enumerate(tweets):
             ans[i] = self.classify(t)
+            print(ans[i])
         return ans
 
 
@@ -64,8 +65,7 @@ class NaiveBayesClassifier(Classifier):
             label_feature_matrix[idx, :] = sliced_samples.sum(0) + 2
             features_prior += label_feature_matrix[idx, :]
             label_feature_matrix[idx, :] *= 1.0 / label_feature_matrix[idx, :].sum()
-            self.labels_prior = len(indexes) / float(num_samples)
-        # print(features_prior)
+            self.labels_prior[idx] = len(indexes) / float(num_samples)
         features_prior *= 1.0 / features_prior.sum()
         self.features_prior = numpy.log(features_prior).T
         self.label_feature_matrix = numpy.log(label_feature_matrix).T

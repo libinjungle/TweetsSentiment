@@ -18,18 +18,22 @@ class UnigramVectorizer(Vectorizer):
         super(UnigramVectorizer, self).__init__()
         self.token_map = token_map
 
-    def vectorize(self, tweet):
+    def vectorize(self, tweet, labeled=True):
         '''
         return numpy array with index as token's index and value as its occurrence
-        :param tweet:
+        :param tweet: list of word
         :return:
         '''
         v = numpy.zeros(self.tokens_size)
-        for token in tweet[0]:
-            if token in self.token_map:
-                v[self.token_map[token]] += 1
+        if labeled:
+            for token in tweet[0]:
+                if token in self.token_map:
+                    v[self.token_map[token]] += 1
             # did not consider those tokens that are not in map
-
+        else:
+            for token in tweet:
+                if token in self.token_map:
+                    v[self.token_map[token]] += 1
         return v
 
     @property
