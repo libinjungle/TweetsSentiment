@@ -4,9 +4,12 @@ import numpy
 import random
 import math
 from my_classifiers import *
+from my_tokenizer import *
+from vectorizer import UnigramVectorizer, BigramVectorizer
 
 PAD = "PAD"
 LABELS = {-1 : 'negative', 0 : 'neutral', 1 : 'positive'}
+DATA_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
 
 def token_filter(function, tokens_map):
     return {k : tokens_map[k] for k in filter(function, tokens_map)}
@@ -75,7 +78,7 @@ def create_gram_map(tf, thresh):
     '''
     token_map = {}
     tf_thresh = token_thresh_filter(tf, thresh)
-    for i, tok in tf_thresh:
+    for i, tok in enumerate(tf_thresh):
         token_map[tok] = i
     return token_map
 
@@ -96,7 +99,7 @@ def divide(dataset, i, k=4):
     num_samples = dataset.shape[0]
     fold_size = int(math.ceil(num_samples / float(k)))
     training_range = range(0, i*fold_size) + range((i+1)*fold_size, num_samples)
-    validation_range = range(i*fold_size, min((i+1))*fold_size, num_samples)
+    validation_range = range(i*fold_size, min((i+1)*fold_size, num_samples))
     return dataset[training_range, :], dataset[validation_range, :]
 
 
@@ -113,7 +116,7 @@ def k_fold_validation(dataset, classifier, k=4):
     fn = Counter()
 
     correct = 0
-    for i in range(4):
+    for i in range(10):
         training_set, validation_set = divide(dataset, i, k)
         tl, td = slicing_labels_features(training_set)
         vl, vd = slicing_labels_features(validation_set)
@@ -130,17 +133,18 @@ def k_fold_validation(dataset, classifier, k=4):
             fp[i] = ((vl != i) * (predictions == i)).sum()
             fn[i] = ((vl == i) * (predictions != i)).sum()
     size = dataset.shape[0]
+    # the first return element is the accuracy for all labels
     return correct / float(size), tp, tn, fp, fn
 
 
-def get_validation_summary(tp, tn, fp, fn, verbose):
+def get_validation_summary(tp, tn, fp, fn, verbose=True):
     ans = {}
     for i in tp:
         ans[i] = get_label_summary(tp, tn, fp, fn, i, verbose)
     return ans
 
 
-def get_label_summary(tp, tn, fp, fn, i, verbose):
+def get_label_summary(tp, tn, fp, fn, i, verbose=True):
     accu = (tp[i]+tn[i]) / float(tp[i]+tn[i]+fp[i]+fn[i])
     precision = tp[i] / float(tp[i]+fp[i])
     recall = tp[i] / float(tp[i]+fn[i])
@@ -152,4 +156,24 @@ def get_label_summary(tp, tn, fp, fn, i, verbose):
         print('recall:      %.3f' % recall)
         print('--------------------------------')
     return accu, precision, recall
+
+
+if __name__ == '__main__':
+    tweets = construct_training_data(DATA_FILE)
+    tf, t_doc_f = count_tokens(tweets)
+    ans = {}
+    for i in range(2, 10):
+        token_map = create_gram_map(tf, i)
+        uni_v = UnigramVectorizer(token_map)
+        dataset = generate_dataset_vectors(tweets, uni_v)
+        classifier = NaiveBayesClassifier(uni_v.tokens_size, LABELS)
+        accu, tp, tn, fp, fn = k_fold_validation(dataset, classifier, 10)
+        print('************Feature Freq=%d********' % i)
+        ans[i] = get_validation_summary(tp, tn, fp, fn)
+
+
+
+
+
+
 

@@ -24,7 +24,7 @@ class UnigramVectorizer(Vectorizer):
         :param tweet:
         :return:
         '''
-        v = numpy.zeros(1, self.tokens_size)
+        v = numpy.zeros(self.tokens_size)
         for token in tweet[0]:
             if token in self.token_map:
                 v[self.token_map[token]] += 1
@@ -43,7 +43,7 @@ class BigramVectorizer(Vectorizer):
         self.bigram_map = bigram_map
 
     def vectorize(self, tweet):
-        v = numpy.zeros(1, self.tokens_size)
+        v = numpy.zeros(self.tokens_size)
         padded = [PAD] + tweet[0] + [PAD]
         for i in range(0, len(padded)-1):
             bigram = padded[i:i+2]

@@ -75,11 +75,11 @@ def construct_training_data(filename):
             tweet_text = text_splited[-2].strip('"').lower()
             tweet_final = tokenize(tweet_text)
             if text_splited[1] == '0':
-                training_data.append((tweet_final, 'negative'))
+                training_data.append((tweet_final, -1))
             elif text_splited[1] == '2':
-                training_data.append((tweet_final, 'neutral'))
+                training_data.append((tweet_final, 0))
             elif text_splited[1] == '4':
-                training_data.append((tweet_final, 'positive'))
+                training_data.append((tweet_final, 1))
     # print(training_data)
     return training_data
 

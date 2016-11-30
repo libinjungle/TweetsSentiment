@@ -27,10 +27,11 @@ class NaiveBayesClassifier(Classifier):
         '''
         super(NaiveBayesClassifier, self).__init__()
         self.n = n
+        self.label_num = len(labels)
         self.label_to_idx = {l : i for i, l in enumerate(labels)}
         self.idx_to_label = {i : l for i, l in enumerate(labels)}
         self.features_prior = None
-        self.labels_prior = numpy.zeros([len(labels), 1])
+        self.labels_prior = numpy.zeros([self.label_num, 1])
 
 
     def train(self, training_data, labels_col):
@@ -55,7 +56,7 @@ class NaiveBayesClassifier(Classifier):
         features_prior = numpy.zeros([1, self.n])
         # shape[0] gives the number of rows
         num_samples = labels_col.shape[0]
-        label_feature_matrix = numpy.zeros([num_samples, self.n])
+        label_feature_matrix = numpy.zeros([self.label_num, self.n])
         for label in self.label_to_idx:
             indexes = numpy.where(labels_col == label)[0] # 0 means row indices
             sliced_samples = training_data[indexes, :]
@@ -67,7 +68,7 @@ class NaiveBayesClassifier(Classifier):
         features_prior *= 1.0 / features_prior.sum()
         self.features_prior = numpy.log(features_prior).T
         self.label_feature_matrix = numpy.log(label_feature_matrix).T
-        self.labels_prior = numpy.log(self.labels_prior)
+        self.labels_prior = numpy.log(self.labels_prior).T
 
 
     def classify(self, tweet):
