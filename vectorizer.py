@@ -13,7 +13,7 @@ class Vectorizer(object):
 class UnigramVectorizer(Vectorizer):
     def __init__(self, token_map):
         # token_map, key is token, value is the index when constructing it
-        # token_map = {'hello':0, 'bin':1, 'this':2}
+        # token_map = {'hello':0, 'bin':1, 'this':2}. token_map is filtered.
         # the same as Vectorizer.__init__(self)
         super(UnigramVectorizer, self).__init__()
         self.token_map = token_map
@@ -21,7 +21,9 @@ class UnigramVectorizer(Vectorizer):
     def vectorize(self, tweet, labeled=True):
         '''
         return numpy array with index as token's index and value as its occurrence
-        :param tweet: list of word
+        :param tweet: list of word. if labeled is true, tweet contains label in it.
+                      labeled == True, tweet format : ([tokens], label)
+                      labeled == False, tweet format : [tokens]
         :return:
         '''
         v = numpy.zeros(self.tokens_size)
@@ -46,9 +48,12 @@ class BigramVectorizer(Vectorizer):
         super(BigramVectorizer, self).__init__()
         self.bigram_map = bigram_map
 
-    def vectorize(self, tweet):
+    def vectorize(self, tweet, labeled=True):
         v = numpy.zeros(self.tokens_size)
-        padded = [PAD] + tweet[0] + [PAD]
+        if labeled:
+            padded = [PAD] + tweet[0] + [PAD]
+        else:
+            padded = [PAD] + tweet + [PAD]
         for i in range(0, len(padded)-1):
             bigram = tuple(padded[i:i+2])
             if bigram in self.bigram_map:

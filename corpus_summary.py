@@ -27,6 +27,7 @@ def token_and_doc_thresh_filter(tokens_map, tokens_doc_map, tok_thresh, doc_thre
 
 def count_tokens(tweets):
     '''
+    plain counting, without using threshold
 
     :param tweets: each element is ([f1, f2, f3, ...], label)
     :return:
@@ -99,6 +100,14 @@ def create_gram_map(tf, thresh):
 
 
 def generate_dataset_vectors(tweets, vectorizer):
+    '''
+    convert tweets to numpy array, with row number is the number of tweet, col number
+    is the number of features.
+
+    :param tweets: a list of ([tweet tokens], label)
+    :param vectorizer:
+    :return:
+    '''
     data = map(lambda tweet : (tweet[1], vectorizer.vectorize(tweet)), tweets)
     # print(data)
     rows = len(data)
@@ -112,6 +121,14 @@ def generate_dataset_vectors(tweets, vectorizer):
 
 
 def divide(dataset, i, k=4):
+    '''
+    divide dataset into training data and validation data for k-fold validation
+
+    :param dataset: generated np array from generate_dataset_vectors()
+    :param i: fold index
+    :param k: total number of folds
+    :return:
+    '''
     num_samples = dataset.shape[0]
     fold_size = int(math.ceil(num_samples / float(k)))
     training_range = range(0, i*fold_size) + range((i+1)*fold_size, num_samples)
@@ -120,6 +137,13 @@ def divide(dataset, i, k=4):
 
 
 def slicing_labels_features(dataset):
+    '''
+    slice dataset after the first col, the first column is labels, the rest is training data
+    without label information sliced.
+
+    :param dataset:
+    :return:
+    '''
     data = dataset[:, 1:]
     label = dataset[:, 0]
     return label, data
@@ -161,6 +185,9 @@ def get_validation_summary(tp, tn, fp, fn, verbose=True):
 
 
 def get_label_summary(tp, tn, fp, fn, i, verbose=True):
+    '''
+    return accuracy, precison and recall.
+    '''
     accu = (tp[i]+tn[i]) / float(tp[i]+tn[i]+fp[i]+fn[i])
     precision = tp[i] / float(tp[i]+fp[i])
     recall = tp[i] / float(tp[i]+fn[i])
