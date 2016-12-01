@@ -1,0 +1,12 @@
+Project Thinking
+
+Data preparation
+Collected tweets using keywords search, separated tweets with respect to candidates
+Cleaned tweets, performed tokenization, stop words removal, porter stemmer
+
+Model training
+Use 498 labeled tweets as training data. Calculate how many tokens the corpus has.
+Filtered tokens that meet threshold(2-6), based on the term frequency or document frequency which is to get those tokens that appears more times than threshold (not implemented). This is called feature selection.
+Construct training dataset using aboved filtered tokens. If use bigrams, the training dataset is the filtered bigramers. The training data is a very large matrix, row number is the number of tweets for training, let’s say m. Column number is the number of filtered tokens, let’s say n. So class Vectorizer is used to convert each tweet in corpus to an vector, which is essentially a numpy array. When combined with label column, training data is formed.
+If we use k-fold validation, we can split the above formatted dataset into two parts, one for training model, one for validating model.
+Naive bayes is implemented on my own. During the training phase, we need to get features_prior which is 1*n array recording the probability of each feature in whole training set level, labels_prior, a k*1 array, where k is the number of labels, this is the probability of each label in terms of occurrence. And label-feature matrix which is the probability of each feature under the label. P(x|yi) is the transpose of logspace of label-feature matrix, P(x) is the transpose of logspace of feature_prior, P(yi) is the transpose of logspace of label_prior. With all these there property trained, we are able to predict the label of unseen tweet

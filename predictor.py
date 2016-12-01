@@ -25,12 +25,12 @@ def gen_classifier():
 
 def classify_many(cf, vectorizer, TWEETS_FILE):
     with open(TWEETS_FILE) as f:
-        for line in f:
+        for i, line in enumerate(f):
             tweet = line.split()
             # print(tweet)
             # False means tweet line does not label
             v = vectorizer.vectorize(tweet, False)
-            print(cf.classify(v))
+            print(i, cf.classify(v))
 
 if __name__ == '__main__':
     cf, vectorizer = gen_classifier()
