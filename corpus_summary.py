@@ -149,6 +149,15 @@ def slicing_labels_features(dataset):
     return label, data
 
 
+def combine_labels_features(labels_col, data_col):
+    n = data_col.shape[0]
+    m = data_col.shape[1]
+    result = numpy.zeros([n, m+1])
+    result[:, 0] = labels_col
+    result[:,1:] = data_col
+    return result
+
+
 def k_fold_validation(dataset, classifier, k=10):
     tp = Counter()
     tn = Counter()
@@ -199,6 +208,8 @@ def get_label_summary(tp, tn, fp, fn, i, verbose=True):
         print('recall:      %.3f' % recall)
         print('--------------------------------')
     return accu, precision, recall
+
+
 
 
 if __name__ == '__main__':
