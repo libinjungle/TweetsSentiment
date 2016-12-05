@@ -61,6 +61,24 @@ def clean_tweet(ifile, ofile):
                     out.write(text + '\n')
 
 
+def clean_tweet_idx(ifile, ofile):
+    # used for baseline, indexes are the line numbers of tweets that are still there after tokenization
+    # indexes are uniquely applied for truncating original tweets in baseline. so that baseline and
+    # my classifier use the same tweets data. Only in this way, the prediction results are comparable
+    indexes = []
+    with open(ofile, 'w') as out:
+        with open(ifile) as tweets:
+            for i, tweet in enumerate(tweets):
+                tweet_cleaned = tokenize(tweet)
+                if tweet_cleaned:
+                    text = ' '.join(tweet_cleaned)
+                    out.write(text + '\n')
+                    indexes.append(i)
+    # 618
+    print("Total number of tweets after filtration: " + str(len(indexes)))
+    return indexes
+
+
 def construct_training_data(filename):
     '''
     used for parsing downloaded training data
@@ -93,14 +111,26 @@ def get_word_features(training_data):
     return word_features
 
 
+
+
 if __name__ == "__main__":
 
     training_data_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
     tweets_corpus_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_small_corpus"
     hillari_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillari_tweets"
-    construct_training_data(hillari_file)
+    trump_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_plain_tweets.txt"
+
+    # construct_training_data(hillari_file)
 
     # tweet preprocessing
-    # clean_tweet(file, "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_cleaned.txt")
+    indexes = clean_tweet_idx(trump_file, "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_tweets_filtered.txt")
+    # generate indexes file
+    idx_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_idx_kept.csv"
+    with open (idx_file, 'w') as idx_f:
+        for i, idx in enumerate(indexes):
+            if  (i+1) % 100 == 0:
+                idx_f.write(str(idx) + '\n')
+            else:
+                idx_f.write(str(idx) + ',')
 
 

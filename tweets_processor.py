@@ -50,10 +50,22 @@ class TweetsProcessor(object):
         both_file.close()
 
 
+    def plain_tweets(self, output):
+        with open(output, 'w') as out:
+            with open('./data/trump_tweets.txt') as trump_input:
+                for line in trump_input:
+                    tweet = line.split('|||')
+                    out.write(tweet[2])
+
+
+
+
 if __name__ == "__main__":
     tweets_corpus_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_small_corpus"
     processor = TweetsProcessor()
-    processor.map_tweets_candidates(tweets_corpus_file)
+    # processor.map_tweets_candidates(tweets_corpus_file)
+    processor.plain_tweets('./data/trump_plain_tweets.txt')
+
 
 
 
