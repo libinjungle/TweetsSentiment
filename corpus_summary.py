@@ -1,5 +1,7 @@
+
 from my_tokenizer import *
 from collections import Counter
+import pickle
 import numpy
 import random
 import math
@@ -9,7 +11,7 @@ from vectorizer import UnigramVectorizer, BigramVectorizer
 
 PAD = "PAD"
 LABELS = {-1 : 'negative', 0 : 'neutral', 1 : 'positive'}
-DATA_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
+DATA_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/training.1600000.processed.noemoticon.csv"
 
 def token_filter(function, tokens_map):
     return {k : tokens_map[k] for k in filter(function, tokens_map)}
@@ -158,7 +160,7 @@ def combine_labels_features(labels_col, data_col):
     return result
 
 
-def k_fold_validation(dataset, classifier, k=10):
+def k_fold_validation(dataset, classifier, k=4):
     tp = Counter()
     tn = Counter()
     fp = Counter()
@@ -166,10 +168,13 @@ def k_fold_validation(dataset, classifier, k=10):
 
     correct = 0
     for i in range(k):
+        print('fold: %d' % i)
         training_set, validation_set = divide(dataset, i, k)
         tl, td = slicing_labels_features(training_set)
         vl, vd = slicing_labels_features(validation_set)
         classifier.train(td, tl)
+        # save classifier
+
         predictions = classifier.classify_tweets(vd)
 
         for i in LABELS:
@@ -210,28 +215,45 @@ def get_label_summary(tp, tn, fp, fn, i, verbose=True):
     return accu, precision, recall
 
 
-
-
 if __name__ == '__main__':
     tweets = construct_training_data(DATA_FILE)
     tf, t_doc_f = count_tokens(tweets)
     bi_f, bi_doc_f = count_bigrams(tweets, 2, 2)
 
     ans = {}
-    for i in range(2, 4):
+    # for i in range(2, 4):
+    for i in range(1, 3):
         token_map = create_gram_map(tf, i)
+        print('freq is: %d' % i)
+        print("token_map created.")
+        print("token_map size is:", len(token_map))
         bigram_map = create_gram_map(bi_f, i)
-
         uni_v = UnigramVectorizer(token_map)
         bigram_v = BigramVectorizer(bigram_map)
-        vectorizers = [uni_v, bigram_v]
+        # vectorizers = [uni_v, bigram_v]
+        vectorizers = [uni_v]
         v_map = {0 : 'unigram', 1 : 'bigram'}
         print('************Feature Freq=%d********' % i)
 
         for j, v in enumerate(vectorizers):
-            print(v_map[j] + ' ' + 'stats')
+            # print(v_map[j] + ' ' + 'stats')
+            # computation insentive step!!!
             dataset = generate_dataset_vectors(tweets, v)
+            print('total number of tweets is: ', dataset.shape[0])
+            print('total number of features is: ', dataset.shape[1])
             classifier = NaiveBayesClassifier(v.tokens_size, LABELS)
+
+            # save classifier
+            # f = open('my_classifier.cf', 'wb')
+            # pickle.dump(classifier, f)
+            # f.close()
+
+            # # load classifier
+            # f = open('my_classifier.cf', 'rb')
+            # classifier = pickle.load(f)
+            # print(classifier.show_most_informative_features(32))
+            # f.close()
+
             accu, tp, tn, fp, fn = k_fold_validation(dataset, classifier)
             ans[(j, i)] = get_validation_summary(tp, tn, fp, fn)
 
@@ -245,7 +267,7 @@ if __name__ == '__main__':
             result.append([label, j, i, r[0], r[1], r[2]])
         # print('')
     result = numpy.array(result)
-    numpy.savetxt('kfold_nb.stats.csv', result, delimiter=',', header=header)
+    numpy.savetxt('kfold_nb.stats_small_corpus.csv', result, fmt='%d,%d,%d' + '%.10f'*3, delimiter=',', header=header)
 
 
 

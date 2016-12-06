@@ -38,10 +38,12 @@ def my_sentiment(cf, vectorizer, TWEETS_FILE):
             v = vectorizer.vectorize(tweet, False)
             label = cf.classify(v)
             # print(i, label)
-            results.append(lb_to_int[label])
+            results.append(label)
     arr = numpy.array(results)
-    arr.reshape([len(results), 1])
-    return results
+    ans = numpy.reshape(arr, (len(results), 1))
+    print('my sentiment:')
+    print(ans)
+    return ans
 
 
 def baseline_sentiment(baseline_file):
@@ -50,8 +52,10 @@ def baseline_sentiment(baseline_file):
         for line in baseline:
             results.append(lb_to_int[line.rstrip()])
     arr = numpy.array(results)
-    arr.reshape([len(results), 1])
-    return arr
+    ans = numpy.reshape(arr, (len(results), 1))
+    print('baseline: ')
+    print(ans)
+    return ans
 
 
 def compare_to_baseline(baseline, myresults):

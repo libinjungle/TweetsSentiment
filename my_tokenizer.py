@@ -1,13 +1,17 @@
+
 import re
 import string
+import codecs
 import tokenizer
 import preprocessor as p
 import nltk
 from nltk.corpus import stopwords
+from unidecode import unidecode
+
 
 # download nltk module. only do this on the first time
-# nltk.download('stopwords')
-# nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('punkt')
 not_included_operators = {'not'}
 included_operators = {'rt', 'http'}
 # stop words
@@ -33,11 +37,12 @@ def tokenize(text):
     # remove punctuation word
     tweet_cleaned = filter(lambda x: x not in string.punctuation, tweet_list)
     # remove punctuation inside word
-    tweet_cleaned = map(lambda s: s.translate(None, string.punctuation), tweet_cleaned)
+    # tweet_cleaned = map(lambda s: s.translate(None, string.punctuation), tweet_cleaned)
+    tweet_cleaned = map(lambda s: s.translate({ord(c) : None for c in string.punctuation}), tweet_cleaned)
     # remove stop word
     tweet_cleaned_no_stopword = [word for word in tweet_cleaned if word not in stops]
     # apply porter stemmer. note: http is porter stemmer of some other word
-    tweet_stemmer = map(lambda word: str(porter_stemmer.stem_word(word)), tweet_cleaned_no_stopword)
+    tweet_stemmer = map(lambda word: porter_stemmer.stem_word(unidecode(word)), tweet_cleaned_no_stopword)
 
     tweet_final = [word.lower() for word in tweet_stemmer if len(word) >= 2]
     return tweet_final
@@ -86,11 +91,18 @@ def construct_training_data(filename):
     :return:
     '''
     training_data = []
-    with open(filename) as tweets:
-        for tweet in tweets:
+    with codecs.open(filename, encoding='utf-8', errors='ignore') as tweets:
+        for i, tweet in enumerate(tweets):
+            if i != 0 and i%1000 == 0:
+                print('processed %d tweets' % i)
             # get tweet text
             text_splited = tweet.split('"')
+            if (len(text_splited) < 2):
+                continue
             tweet_text = text_splited[-2].strip('"').lower()
+
+            # print(tweet_text)
+
             tweet_final = tokenize(tweet_text)
             if text_splited[1] == '0':
                 training_data.append((tweet_final, -1))
