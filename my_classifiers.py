@@ -63,11 +63,11 @@ class NaiveBayesClassifier(Classifier):
         num_samples = labels_col.shape[0]
         label_feature_matrix = numpy.zeros([self.label_num, self.n])
         for label in self.label_to_idx:
-            print('label is: %d ' % label)
+            # print('label is: %d ' % label)
             indexes = numpy.where(labels_col == label)[0] # 0 means row indices
             sliced_samples = training_data[indexes, :]
             idx = self.label_to_idx[label]
-            print('index is: %d' % idx)
+            # print('index is: %d' % idx)
             label_feature_matrix[idx, :] = sliced_samples.sum(0) + 2
             features_prior += label_feature_matrix[idx, :]
             label_feature_matrix[idx, :] *= 1.0 / label_feature_matrix[idx, :].sum()

@@ -267,7 +267,7 @@ if __name__ == '__main__':
             result.append([label, j, i, r[0], r[1], r[2]])
         # print('')
     result = numpy.array(result)
-    numpy.savetxt('kfold_nb.stats_small_corpus.csv', result, fmt='%d,%d,%d' + '%.10f'*3, delimiter=',', header=header)
+    numpy.savetxt('kfold_nb.stats.csv', result, fmt='%d,%d,%d,' + '%.10f'*3, delimiter=',', header=header)
 
 
 

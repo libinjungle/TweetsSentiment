@@ -4,9 +4,13 @@ from corpus_summary import *
 
 
 TWEETS_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_cleaned.txt"
-TRAIN_DATA_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
-BASELINE_PREDICTION = "/Users/binli/PycharmProjects/TweetsSentiment/data/baseline_prediction"
-TRUMP_TWEETS_FILTERED_CLEANED = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_tweets_filtered.txt"
+TRAIN_DATA_FILE = "/Users/binli/PycharmProjects/TweetsSentiment/data/training.1600000.processed.noemoticon.csv"
+TRUMP_BASELINE_PREDICTION = "/Users/binli/PycharmProjects/TweetsSentiment/data/stats/prediction/trump_baseline_prediction"
+TRUMP_TWEETS_FILTERED_CLEANED = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_tweets_filtered_large.txt"
+
+HILLARY_BASELINE_PREDICTION = "/Users/binli/PycharmProjects/TweetsSentiment/data/stats/prediction/hillary_baseline_prediction"
+HILLARY_TWEETS_FILTERED_CLEANED = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillary_tweets_filtered_large.txt"
+
 
 LABELS = {-1 : 'negative', 0 : 'neutral', 1 : 'positive'}
 lb_to_int = {'negative' : -1, 'very negative' : -1, 'neutral' : 0, 'positive' : 1, 'very positive' : 1}
@@ -29,6 +33,16 @@ def gen_classifier():
 
 
 def my_sentiment(cf, vectorizer, TWEETS_FILE):
+    '''
+    vectorize each tweet
+    :param cf:
+    :param vectorizer:
+    :param TWEETS_FILE: both filtered and cleaned tweets file used for prediction.
+                        we need to do filtration because after preprocessing, some
+                        tweets may be reduced to zero length. only non-zero length
+                        tweets are kept to do the prediction
+    :return:
+    '''
     results = []
     with open(TWEETS_FILE) as f:
         for i, line in enumerate(f):
@@ -65,17 +79,34 @@ def compare_to_baseline(baseline, myresults):
     fn = Counter()
 
     for i in LABELS:
-        tp[i] = ((baseline == i) * (myresults == i)).sum()
-        tn[i] = ((baseline != i) * (myresults != i)).sum()
-        fp[i] = ((baseline != i) * (myresults == i)).sum()
-        fn[i] = ((baseline == i) * (myresults != i)).sum()
-    return tp, tn, tp, fn
+        tp[i] += ((baseline == i) * (myresults == i)).sum()
+        tn[i] += ((baseline != i) * (myresults != i)).sum()
+        fp[i] += ((baseline != i) * (myresults == i)).sum()
+        fn[i] += ((baseline == i) * (myresults != i)).sum()
+    return tp, tn, fp, fn
 
 
 if __name__ == '__main__':
     cf, vectorizer = gen_classifier()
-    my_senti = my_sentiment(cf, vectorizer, TRUMP_TWEETS_FILTERED_CLEANED)
-    baseline_senti = baseline_sentiment(BASELINE_PREDICTION)
-    tp, tn, fp, fn = compare_to_baseline(baseline_senti, my_senti)
-    get_validation_summary(tp, tn, fp, fn, True)
+
+    # for trump tweets
+    # my_trump_senti = my_sentiment(cf, vectorizer, TRUMP_TWEETS_FILTERED_CLEANED)
+    # trump_baseline_senti = baseline_sentiment(TRUMP_BASELINE_PREDICTION)
+
+    # for hillary tweets
+    my_hillary_senti = my_sentiment(cf, vectorizer, HILLARY_TWEETS_FILTERED_CLEANED)
+    hillary_baseline_senti = baseline_sentiment(HILLARY_BASELINE_PREDICTION)
+    tp, tn, fp, fn = compare_to_baseline(hillary_baseline_senti, my_hillary_senti)
+
+
+    results = get_validation_summary(tp, tn, fp, fn, True)
+    header = 'Label,Model(u),Freq,accuracy,precison,recall'
+
+    ans = []
+    for lb in results:
+        r = results[lb]
+        ans.append([lb, 0, 2, r[0], r[1], r[2]])
+    numpy.savetxt('hillary_large_prediction_base_comp.csv', ans, fmt='%d,%d,%d,'+'%.10f,'*3, delimiter=',', header=header)
+
+
 

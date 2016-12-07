@@ -7,6 +7,7 @@ import preprocessor as p
 import nltk
 from nltk.corpus import stopwords
 from unidecode import unidecode
+import time
 
 
 # download nltk module. only do this on the first time
@@ -67,12 +68,14 @@ def clean_tweet(ifile, ofile):
 
 
 def clean_tweet_idx(ifile, ofile):
+    # given a tweet file that only contains tweet text, output to a cleaned and filtered tweet file.
+    # return the idxes of tweets kept in the original file.
     # used for baseline, indexes are the line numbers of tweets that are still there after tokenization
     # indexes are uniquely applied for truncating original tweets in baseline. so that baseline and
     # my classifier use the same tweets data. Only in this way, the prediction results are comparable
     indexes = []
     with open(ofile, 'w') as out:
-        with open(ifile) as tweets:
+        with codecs.open(ifile, encoding='utf-8', errors='ignore') as tweets:
             for i, tweet in enumerate(tweets):
                 tweet_cleaned = tokenize(tweet)
                 if tweet_cleaned:
@@ -124,25 +127,37 @@ def get_word_features(training_data):
 
 
 
-
 if __name__ == "__main__":
 
     training_data_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/testdata.manual.2009.06.14.csv"
     tweets_corpus_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_small_corpus"
-    hillari_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillari_tweets"
-    trump_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_plain_tweets.txt"
+
+    hillari_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillary_plain_tweets_large.txt"
+    trump_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_plain_tweets_large.txt"
 
     # construct_training_data(hillari_file)
 
     # tweet preprocessing
-    indexes = clean_tweet_idx(trump_file, "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_tweets_filtered.txt")
+    hillari_indexes = clean_tweet_idx(hillari_file, "/Users/binli/PycharmProjects/TweetsSentiment/data/hillary_tweets_filtered_large.txt")
+    trump_indexes = clean_tweet_idx(trump_file, "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_tweets_filtered_large.txt")
     # generate indexes file
-    idx_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/tweets_idx_kept.csv"
-    with open (idx_file, 'w') as idx_f:
-        for i, idx in enumerate(indexes):
+    trump_idx_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/trump_large_tweets_idx_kept.csv"
+    hillari_idx_file = "/Users/binli/PycharmProjects/TweetsSentiment/data/hillary_large_tweets_idx_kept.csv"
+
+    time.sleep(5)
+    with open (trump_idx_file, 'w') as t_idx_f:
+        for i, idx in enumerate(trump_indexes):
             if  (i+1) % 100 == 0:
-                idx_f.write(str(idx) + '\n')
+                t_idx_f.write(str(idx) + '\n')
             else:
-                idx_f.write(str(idx) + ',')
+                t_idx_f.write(str(idx) + ',')
+    with open(hillari_idx_file, 'w') as h_idx_f:
+        for i, idx in enumerate(hillari_indexes):
+            if (i+1) % 100 == 0:
+                h_idx_f.write(str(idx) + '\n')
+            else:
+                h_idx_f.write(str(idx) + ',')
+
+
 
 
